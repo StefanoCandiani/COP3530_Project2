@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include <iomanip>
+#include <sstream>
 using namespace std;
 
 class AdjacencyList {
@@ -17,6 +18,9 @@ class AdjacencyList {
         unordered_map<string, vector<string>> linksTo;
         // map storing a link and the links pointing to it
         map<string, vector<pair<string,float>>> linksFrom;
+        // String version of the page rank for catch testing
+        string strVerPR;
+        // Count of vertices in graph
         int vCount;
 
     public:
@@ -104,30 +108,59 @@ class AdjacencyList {
 
             auto iter2 = rank.begin();
             for(; iter2 != rank.end(); iter2++) {
-                cout << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
+                stringstream tempStream;
+                tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
+                strVerPR += tempStream.str();
+                cout << tempStream.str();
             }
 
         }
 
+        /* Catch Testing Functions */ 
+        void parseInput(const string input){
+            string line = input.substr(0, input.find("\n"));
+            int numLines = stoi(line.substr(0, line.find(" ")));
+            int numIter = stoi(line.substr(line.find(" ") + 1, line.size() - line.find(" ")));
+            int nextLineIndex = line.size() + 1;
+            string tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
+            string from, to;
+            while(numLines > 0) {
+                // cout << nextLineIndex << " " << tempInput.find("\n") << endl;
+                if(input.size() > nextLineIndex) {
+                    tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
+                    line = input.substr(nextLineIndex, tempInput.find("\n"));
+                    from = line.substr(0, line.find(" "));
+                    to = line.substr(line.find(" ") + 1, line.size() - line.find(" "));
+                    nextLineIndex += line.size() + 1;
+                    numLines--;
+                    this -> insert(from, to);
+                }
+            }
+            this -> calculateOutdegrees();
+        }
+
+        string getStringRepresentation() {
+            return strVerPR;
+        }
 
 };
 
 /// Testing
 
-//7 2
-//1 2
-//1 4
-//2 4
-//3 5
-//4 3
-//5 1
-//5 2
+// 7 2
+// 1 2
+// 1 4
+// 2 4
+// 3 5
+// 4 3
+// 5 1
+// 5 2
 
-//7 2
-//google gmail
-//google maps
-//facebook ufl
-//ufl google
-//ufl gmail
-//maps facebook
-//gmail maps
+// 7 2
+// google gmail
+// google maps
+// facebook ufl
+// ufl google
+// ufl gmail
+// maps facebook
+// gmail maps

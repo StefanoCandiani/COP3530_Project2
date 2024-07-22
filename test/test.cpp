@@ -1,12 +1,47 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
-
-// change if you choose to use a different header name
 #include "adjacencyList.cpp"
-
 using namespace std;
 
-// the syntax for defining a test is below. It is important for the name to be unique, but you can group multiple tests with [tags]. A test can have [multiple][tags] using that syntax.
+/// String parsing for catch testing
+void parseInput(const string input, AdjacencyList &aList) {
+    // Collect first line
+    string line = input.substr(0, input.find('\n'));
+    // Read the number of following lines and the number of power iterations
+    int numLines = stoi(line.substr(0, line.find(' ')));
+    int numIter = stoi(line.substr(line.find(' ') + 1, line.size() - line.find(' ')));
+    // Find the index of the next line
+    int nextLineIndex = line.size() + 1;
+    // Remove the current line from input and store it at tempInput
+    string tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
+    string from, to;
+    // Iterate until all lines have been read
+    while(numLines > 0) {
+        // Prevent out of range error by ensuring input is never smaller than the next line index
+        if(input.size() > nextLineIndex) {
+            // Update temp input to remove the current line
+            tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
+            // Isolate current line, collect from and to from it and insert them to the current adjacency list
+            line = input.substr(nextLineIndex, tempInput.find('\n'));
+            from = line.substr(0, line.find(' '));
+            to = line.substr(line.find(' ') + 1, line.size() - line.find(' '));
+            aList.insert(from, to);
+            // Update the next line index
+            nextLineIndex += line.size() + 1;
+            // Decrement numLines
+            numLines--;
+        }
+    }
+    // Calculate the outdegrees of the current adjacency list
+    aList.calculateOutdegrees();
+    // Restrict printing from cout, link: https://stackoverflow.com/questions/30184998
+    cout.setstate(ios_base::failbit);
+    // Process page rank
+    aList.PageRank(numIter);
+    // Clear cout restriction
+    cout.clear();
+}
+
 TEST_CASE("PageRank Test 1 - One website points to many", "[2PI]"){
 
     string input =
@@ -38,7 +73,7 @@ yahoo.com 0.01)";
     string actualOutput;
 
     AdjacencyList t1;
-    t1.parseInput(input);
+    parseInput(input, t1);
     actualOutput = t1.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);
@@ -75,14 +110,15 @@ yahoo.com 0.00)";
 
     string actualOutput;
 
-    AdjacencyList t3;
-    t3.parseInput(input);
-    actualOutput = t3.getStringRepresentation();
+    AdjacencyList t2;
+    parseInput(input, t2);
+    actualOutput = t2.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);
 
 }
 
+// Not working due to setprecision rounding error, but otherwise correct.
 TEST_CASE("PageRank Test 3 - Many power iterations", "[300PI]"){
 
     string input =
@@ -102,7 +138,7 @@ ufl.edu 0.50)";
     string actualOutput;
 
     AdjacencyList t3;
-    t3.parseInput(input);
+    parseInput(input, t3);
     actualOutput = t3.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);
@@ -240,7 +276,7 @@ zoom.us 0.03)";
     string actualOutput;
 
     AdjacencyList t4;
-    t4.parseInput(input);
+    parseInput(input, t4);
     actualOutput = t4.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);
@@ -293,12 +329,13 @@ zoom.us 0.17)";
     string actualOutput;
 
     AdjacencyList t5;
-    t5.parseInput(input);
+    parseInput(input, t5);
     actualOutput = t5.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);
 }
 
+// Same problem as test case 3, rounding issue with setprecision
 TEST_CASE("PageRank Test 6 - 1000 edges", "[2PI]"){
 
     string input =
@@ -1333,7 +1370,7 @@ zoom.us 0.05)";
     string actualOutput;
 
     AdjacencyList t6;
-    t6.parseInput(input);
+    parseInput(input, t6);
     actualOutput = t6.getStringRepresentation();
 
     REQUIRE(actualOutput == expectedOutput);

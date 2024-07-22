@@ -13,7 +13,8 @@ using namespace std;
 class AdjacencyList {
 
     private:
-        //Think about what member variables you need to initialize
+
+        /// Variable initialization
         // Unordered_map storing a link and the links it points to
         unordered_map<string, vector<string>> linksTo;
         // map storing a link and the links pointing to it
@@ -24,7 +25,6 @@ class AdjacencyList {
         int vCount;
 
     public:
-        //Think about what helper functions you will need in the algorithm
 
         /// Default constructor
         AdjacencyList() {
@@ -47,9 +47,12 @@ class AdjacencyList {
 
         /// Calculates the 1/d_x for each of the links
         void calculateOutdegrees() {
+            // Iterate through the linksFrom map
             auto iter = linksFrom.begin();
             for(; iter != linksFrom.end(); iter++) {
+                // Iterate through the links that link to the current link
                 for(int i = 0; i < iter -> second.size(); i++) {
+                    // Calculate the 1/outdegree of each link using the linksTo unordered_map
                     string from = (iter -> second)[i].first;
                     (iter -> second)[i].second = (1.0/(float)(linksTo[from].size()));
                 }
@@ -58,14 +61,20 @@ class AdjacencyList {
 
         /// Display each page in the adjacency list and its connections
         void display() {
+            // Print number of vertices
             cout << "Adjacency list vertex count = " << vCount << endl;
+            // Iterate through linksFrom map
             auto iter = linksFrom.begin();
             for(; iter != linksFrom.end(); iter++) {
+                // Print the current link
                 cout << iter -> first << " linked by: ";
+                // Iterate through the links that point to the current link
                 for(int i = 0; i < (iter -> second).size(); i++) {
+                    // Print the link and the 1/outdegree of each of the links
                     cout << (iter -> second)[i].first << " 1/d_" << (iter -> second)[i].first << " = ";
                     cout << (iter -> second)[i].second << ", ";
                 }
+                // Buffer
                 cout << endl;
             }
         }
@@ -76,76 +85,66 @@ class AdjacencyList {
         // ascending alphabetical order of webpages and rounding rank to
         // two decimal places
 
+            // Initialize the rank and tempRank maps
             map<string, float> rank;
             map<string, float> tempRank;
+
+            // Populate the rank map with the initial rank of each link (1/numberOfVertices)
             auto populator = linksFrom.begin();
             for(; populator != linksFrom.end(); populator++) {
                 rank[populator -> first] = (1.0f/vCount);
             }
 
-            // Perform multiplication
+            // Perform multiplication n - 1 times
             float sum = 0.0f;
             string from;
             while(n > 1) {
+                // Iterate through linksFrom map
                 auto iter1 = linksFrom.begin();
                 for(; iter1 != linksFrom.end(); iter1++){
+                    // Iterate through the links that point to the current link
                     for(pair<string,float> i : iter1 -> second) {
+                        // Multiply the (1/outdegree) by the rank at the given link and add to sum
                         sum += i.second * rank[i.first];
                     }
+                    // Apply the sum to the rank at the given link for tempRank. Done to ensure that the edge list
+                    // multiplication is not affected by changes to rank
                     tempRank[iter1 -> first] = sum;
+                    // Reset the sum
                     sum = 0.0f;
                 }
+                // Apply tempRank to rank to ensure future power iterations are based on the new rank
                 rank = tempRank;
+                // Decrease the number of power iterations
                 n--;
             }
 
+            // Manage string representation storage for catch testing and the printing of the map
             int rankSize = rank.size();
+            // Iterate through rank map
             auto iter2 = rank.begin();
             for(; iter2 != rank.end(); iter2++) {
+                // Use string streams to apply setprecision
                 stringstream tempStream;
-                // ceilf(val * 100) / 100 rounding up method from: https://stackoverflow.com/questions/1343890  (Setprecision wasn't rounding up properly)
+                // Apply an endl if current link rank is not the last one and no endl if it is the last one (done for
+                // proper string parsing for catch tests)
                 if(rankSize > 1) {
-                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(3) << /*(ceilf(*/iter2 -> second/* * 100) / 100)*/ << endl;
+                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
                 } else {
-                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(3) << /*(ceilf(*/iter2 -> second/* * 100) / 100)*/;
+                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second;
                 }
                 strVerPR += tempStream.str();
+                // Printing for main.cpp
                 cout << tempStream.str();
+                // Decrease rank size count
                 rankSize--;
             }
 
         }
 
         /** Catch Testing Functions **/
-        void parseInput(const string input){
-            string line = input.substr(0, input.find("\n"));
-            int numLines = stoi(line.substr(0, line.find(" ")));
-            int numIter = stoi(line.substr(line.find(" ") + 1, line.size() - line.find(" ")));
-            int nextLineIndex = line.size() + 1;
-            string tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
-            string from, to;
-            while(numLines > 0) {
-                // cout << nextLineIndex << " " << tempInput.find("\n") << endl;
-                if(input.size() > nextLineIndex) {
-                    tempInput = input.substr(nextLineIndex, input.size() - nextLineIndex);
-                    line = input.substr(nextLineIndex, tempInput.find("\n"));
-                    from = line.substr(0, line.find(" "));
-                    to = line.substr(line.find(" ") + 1, line.size() - line.find(" "));
-                    nextLineIndex += line.size() + 1;
-                    numLines--;
-                    this -> insert(from, to);
-                }
-            }
-            this -> calculateOutdegrees();
-            // Restrict printing from cout, link: https://stackoverflow.com/questions/30184998
-            cout.setstate(ios_base::failbit);
-            this -> PageRank(numIter);
-            cout.clear();
 
-        }
-
-        string getStringRepresentation() {
-            return strVerPR;
-        }
+        /// String version of output getter
+        string getStringRepresentation() { return strVerPR; }
 
 };

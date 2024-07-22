@@ -56,13 +56,6 @@ class AdjacencyList {
             }
         }
 
-        /// Returns all in links from a given link
-        vector<pair<string,float>> getAdjacent(string to) {
-            if(linksFrom.find(to) != linksFrom.end()) {
-                return linksFrom[to];
-            }
-        }
-
         /// Display each page in the adjacency list and its connections
         void display() {
             cout << "Adjacency list vertex count = " << vCount << endl;
@@ -106,17 +99,24 @@ class AdjacencyList {
                 n--;
             }
 
+            int rankSize = rank.size();
             auto iter2 = rank.begin();
             for(; iter2 != rank.end(); iter2++) {
                 stringstream tempStream;
-                tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
+                // ceilf(val * 100) / 100 rounding up method from: https://stackoverflow.com/questions/1343890  (Setprecision wasn't rounding up properly)
+                if(rankSize > 1) {
+                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(3) << /*(ceilf(*/iter2 -> second/* * 100) / 100)*/ << endl;
+                } else {
+                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(3) << /*(ceilf(*/iter2 -> second/* * 100) / 100)*/;
+                }
                 strVerPR += tempStream.str();
                 cout << tempStream.str();
+                rankSize--;
             }
 
         }
 
-        /* Catch Testing Functions */ 
+        /** Catch Testing Functions **/
         void parseInput(const string input){
             string line = input.substr(0, input.find("\n"));
             int numLines = stoi(line.substr(0, line.find(" ")));
@@ -137,6 +137,11 @@ class AdjacencyList {
                 }
             }
             this -> calculateOutdegrees();
+            // Restrict printing from cout, link: https://stackoverflow.com/questions/30184998
+            cout.setstate(ios_base::failbit);
+            this -> PageRank(numIter);
+            cout.clear();
+
         }
 
         string getStringRepresentation() {
@@ -144,23 +149,3 @@ class AdjacencyList {
         }
 
 };
-
-/// Testing
-
-// 7 2
-// 1 2
-// 1 4
-// 2 4
-// 3 5
-// 4 3
-// 5 1
-// 5 2
-
-// 7 2
-// google gmail
-// google maps
-// facebook ufl
-// ufl google
-// ufl gmail
-// maps facebook
-// gmail maps

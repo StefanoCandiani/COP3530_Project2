@@ -17,8 +17,6 @@
          Alist.insert(from, to);
      }
 
-     cout << endl;
-
      //Create a graph object
      Alist.calculateOutdegrees();
      Alist.PageRank(power_iterations);

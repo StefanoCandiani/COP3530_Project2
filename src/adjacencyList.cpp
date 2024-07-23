@@ -59,26 +59,6 @@ class AdjacencyList {
             }
         }
 
-        /// Display each page in the adjacency list and its connections
-        void display() {
-            // Print number of vertices
-            cout << "Adjacency list vertex count = " << vCount << endl;
-            // Iterate through linksFrom map
-            auto iter = linksFrom.begin();
-            for(; iter != linksFrom.end(); iter++) {
-                // Print the current link
-                cout << iter -> first << " linked by: ";
-                // Iterate through the links that point to the current link
-                for(int i = 0; i < (iter -> second).size(); i++) {
-                    // Print the link and the 1/outdegree of each of the links
-                    cout << (iter -> second)[i].first << " 1/d_" << (iter -> second)[i].first << " = ";
-                    cout << (iter -> second)[i].second << ", ";
-                }
-                // Buffer
-                cout << endl;
-            }
-        }
-
         /// Page Rank calculation
         void PageRank(int n) {
         // prints the PageRank of all pages after p powerIterations in
@@ -120,24 +100,15 @@ class AdjacencyList {
             }
 
             // Manage string representation storage for catch testing and the printing of the map
-            int rankSize = rank.size();
             // Iterate through rank map
             auto iter2 = rank.begin();
             for(; iter2 != rank.end(); iter2++) {
                 // Use string streams to apply setprecision
                 stringstream tempStream;
-                // Apply an endl if current link rank is not the last one and no endl if it is the last one (done for
-                // proper string parsing for catch tests)
-                if(rankSize > 1) {
-                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
-                } else {
-                    tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second;
-                }
+                tempStream << iter2 -> first << " " << fixed << showpoint << setprecision(2) << iter2 -> second << endl;
                 strVerPR += tempStream.str();
                 // Printing for main.cpp
                 cout << tempStream.str();
-                // Decrease rank size count
-                rankSize--;
             }
 
         }
